@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CYBERSECURITY ARENA</title>
+<style>
+/* Theme: dark terminal, stark black, fsociety-style red, scanlines, light glitch */
+:root{--bg:#000;--panel:#0b0b0b;--line:#3a1212;--cy:#e11d1d;--gr:#33ff66;--rd:#ffb000;--tx:#d6d6d6;--mu:#8c8c8c;--mono:"Courier New",ui-monospace,Consolas,"Liberation Mono",monospace}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.6 var(--mono);min-height:100vh}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:50;background:repeating-linear-gradient(0deg,rgba(255,255,255,.035) 0 1px,transparent 1px 3px);mix-blend-mode:overlay}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:49;background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.85))}
+header{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;padding:12px 20px;border-bottom:2px solid var(--cy);background:#050505}
+.prompt{display:block;color:var(--mu);font-size:.8rem}.prompt b{color:var(--gr);font-weight:400}
+h1{margin:0;font:700 1.45rem var(--mono);letter-spacing:.28em;color:#fff;text-shadow:2px 0 var(--cy),-2px 0 #00e5ff;animation:glitch 5s infinite steps(1)}
+h1::after{content:"_";color:var(--cy);animation:blink 1s infinite steps(1)}
+@keyframes blink{50%{opacity:0}}
+@keyframes glitch{0%,92%,100%{transform:none;text-shadow:2px 0 var(--cy),-2px 0 #00e5ff}93%{transform:translate(-3px,1px);text-shadow:-4px 0 var(--cy),4px 0 #00e5ff}95%{transform:translate(3px,-1px)}97%{transform:translate(0,1px);text-shadow:3px 0 var(--cy),-3px 0 #00e5ff}}
+h2{color:#fff;margin:.3em 0;text-transform:uppercase;letter-spacing:.08em}h2::before{content:"> ";color:var(--cy)}
+h3{margin:0;color:#fff}h3::before{content:"# ";color:var(--cy)}
+main{max-width:1000px;margin:0 auto;padding:20px}
+.stats{display:flex;gap:10px;flex-wrap:wrap}
+.stat{border:1px solid var(--cy);padding:3px 10px;background:#000;text-transform:uppercase;font-size:.85rem;letter-spacing:.08em}
+.stat b{color:var(--gr)}
+button,select,input,textarea{font:inherit;color:var(--tx);background:#000;border:1px solid #555;border-radius:0;padding:7px 12px}
+button{cursor:pointer;text-transform:uppercase;letter-spacing:.06em;font-size:.88rem}
+button:hover{background:var(--cy);border-color:var(--cy);color:#000;box-shadow:0 0 12px rgba(225,29,29,.7)}
+button.primary{border-color:var(--cy);color:#fff}
+button.danger{border-style:dashed;border-color:var(--rd);color:var(--rd)}
+button.danger:hover{background:var(--rd);color:#000;border-color:var(--rd)}
+button.suggest{border-color:var(--gr);color:var(--gr);box-shadow:0 0 10px rgba(51,255,102,.6);animation:blink 1.4s infinite}
+button.sel{background:var(--cy);color:#000;border-color:var(--cy)}
+button:disabled{opacity:.35;cursor:not-allowed}button:disabled:hover{background:#000;color:var(--tx);box-shadow:none;border-color:#555}
+:focus-visible{outline:2px solid var(--gr);outline-offset:2px}
+textarea,input[type=text]{width:100%;caret-color:var(--gr);color:var(--gr)}
+textarea:focus,input:focus{border-color:var(--gr)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.card{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--cy);padding:16px;margin:14px 0}
+.chal:hover{border-color:var(--cy);box-shadow:0 0 18px rgba(225,29,29,.35)}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0;align-items:center}
+.ph{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:6px}
+.badge{border:1px solid var(--gr);color:var(--gr);padding:1px 10px;font-size:.8rem;text-transform:uppercase}
+pre,.out{background:#000;border:1px solid #333;border-left:3px solid var(--gr);color:var(--gr);padding:10px;white-space:pre-wrap;word-break:break-word;font-family:var(--mono);min-height:2.5em;margin:8px 0}
+.err{color:var(--rd);border-left-color:var(--rd)}.ok{color:var(--gr)}
+.fb{padding:8px 12px;border-left:4px solid var(--rd);background:#140d00;margin:8px 0;color:var(--rd)}.fb.good{border-color:var(--gr);background:#001408;color:var(--gr)}
+.hint{padding:6px 12px;border-left:4px solid var(--cy);background:#140303;margin:6px 0}
+table{width:100%;border-collapse:collapse;font-size:.88rem}
+th,td{border-bottom:1px solid #2a2a2a;padding:5px 8px;text-align:left}th{color:var(--cy);text-transform:uppercase}
+tr[tabindex]{cursor:pointer}tr[tabindex]:hover td{background:#1a0606}
+tr.pick td{background:#2a0808;color:#fff}
+mark{background:var(--cy);color:#fff}
+progress{width:100%;height:14px;accent-color:#e11d1d}
+.timer{font:700 2rem var(--mono);color:var(--gr);letter-spacing:.1em}.timer.low{color:var(--cy);animation:blink .8s infinite}
+.win{text-align:center;border:2px solid var(--gr);padding:20px;animation:glow 1.6s ease-in-out infinite alternate}
+@keyframes glow{from{box-shadow:0 0 6px var(--gr)}to{box-shadow:0 0 28px var(--gr)}}
+#overlay{position:fixed;inset:0;background:rgba(0,0,0,.88);display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:20px;z-index:60}
+#overlay[hidden]{display:none}
+.modal{background:#050505;border:1px solid var(--cy);box-shadow:0 0 30px rgba(225,29,29,.4);width:min(860px,100%);padding:16px}
+.mh{display:flex;justify-content:space-between;align-items:center}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+details{margin:8px 0;color:var(--mu)}small,.mu{color:var(--mu)}
+.boot{color:var(--mu);font-size:.85rem;margin:0 0 10px}.boot b{color:var(--gr);font-weight:400}
+footer{text-align:center;padding:20px;color:var(--mu);font-size:.85rem}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+<header>
+ <div><span class="prompt"><b>root@arena</b>:~# ./start --offline</span><h1>CYBERSECURITY ARENA</h1></div>
+ <div class="stats" aria-live="polite">
+  <span class="stat">Player <b id="hSession">1</b></span>
+  <span class="stat">Score <b id="hScore">0</b></span>
+  <span class="stat">Completed <b id="hDone">0/3</b></span>
+ </div>
+ <nav class="row">
+  <button id="bHome">Home</button>
+  <button id="bTools" class="primary">Cyber Toolkit</button>
+  <button id="bHost" title="Event host controls" aria-label="Host panel">Host</button>
+ </nav>
+</header>
+<main id="app"></main>
+<footer>// fictional scenarios only // runs locally // no data leaves this machine //</footer>
+<div id="overlay" hidden></div>
+
+<script>
+"use strict";
+// =====================================================================
+// PURE LOGIC SECTION (no DOM access). This block is also unit-tested.
+// =====================================================================
+//#PURE-START
+// Normalize free-text answers: trim, lowercase, collapse spaces.
+const n = s => String(s).trim().toLowerCase().replace(/\s+/g, " ");
+
+// Caesar shift that preserves case, spaces, and punctuation.
+function caesar(text, shift) {
+  const k = ((shift % 26) + 26) % 26;
+  return text.replace(/[a-z]/gi, c => {
+    const base = c <= "Z" ? 65 : 97;
+    return String.fromCharCode((c.charCodeAt(0) - base + k) % 26 + base);
+  });
+}
+// Base64 with correct UTF-8 handling and validation.
+function b64enc(text) {
+  let bin = "";
+  new TextEncoder().encode(text).forEach(b => { bin += String.fromCharCode(b); });
+  return btoa(bin);
+}
+function b64dec(text) {
+  const clean = text.replace(/\s+/g, "");
+  if (!clean) throw new Error("Enter some Base64 text first.");
+  if (!/^[A-Za-z0-9+/]*={0,2}$/.test(clean) || clean.length % 4 === 1) {
+    throw new Error("This is not valid Base64. Allowed: letters, digits, + / and = padding.");
+  }
+  const bytes = Uint8Array.from(atob(clean), c => c.charCodeAt(0));
+  try { return new TextDecoder("utf-8", { fatal: true }).decode(bytes); }
+  catch (e) { throw new Error("The decoded bytes are not valid UTF-8 text."); }
+}
+function hexToText(text) {
+  const clean = text.replace(/0x/gi, "").replace(/[\s,:-]+/g, "");
+  if (!clean || clean.length % 2 || !/^[0-9a-f]+$/i.test(clean)) {
+    throw new Error("Enter an even number of hex digits (0-9, A-F), e.g. 48 69.");
+  }
+  const bytes = new Uint8Array(clean.match(/../g).map(x => parseInt(x, 16)));
+  try { return new TextDecoder("utf-8", { fatal: true }).decode(bytes); }
+  catch (e) { throw new Error("These bytes are not valid UTF-8 text."); }
+}
+function textToHex(text) {
+  return Array.from(new TextEncoder().encode(text)).map(b => b.toString(16).padStart(2, "0")).join(" ");
+}
+// Scoring rule: each hint level costs 20% of the maximum; never below 40%.
+const ptsFor = (max, hints) => Math.max(Math.round(max * 0.4), max - Math.round(max * 0.2) * hints);
+
+// Fictional incident log: [time, user, event, source IP, detail]
+const LOG = [
+  ["02:11", "jlee", "LOGIN_FAILED", "203.0.113.50", ""],
+  ["02:12", "jlee", "LOGIN_FAILED", "203.0.113.50", ""],
+  ["02:12", "jlee", "LOGIN_FAILED", "203.0.113.50", ""],
+  ["02:13", "jlee", "LOGIN_FAILED", "203.0.113.50", ""],
+  ["02:14", "jlee", "LOGIN_OK", "203.0.113.50", ""],
+  ["02:16", "jlee", "FILE_READ", "203.0.113.50", "payroll_2026.xlsx"],
+  ["02:19", "jlee", "ROLE_ADDED", "203.0.113.50", "Admins"],
+  ["02:21", "jlee", "FILE_EXPORT", "203.0.113.50", "customer_db.csv"],
+  ["09:02", "mara", "LOGIN_OK", "192.0.2.10", ""],
+  ["09:15", "devon", "LOGIN_OK", "192.0.2.11", ""],
+  ["09:40", "mara", "FILE_READ", "192.0.2.10", "handbook.pdf"]
+];
+const EVENT_HELP = {
+  LOGIN_FAILED: "A login attempt was rejected. One failure is common (typos); many in a row deserve attention.",
+  LOGIN_OK: "A login succeeded. Context matters: time of day, address, and what happened before it.",
+  FILE_READ: "A file was opened. Sensitive files (payroll, customers) are worth checking against the user's normal duties.",
+  ROLE_ADDED: "The account received extra privileges. Unexpected privilege changes are a serious signal.",
+  FILE_EXPORT: "Data was copied out of the system. Check whether the user normally does this."
+};
+// Log lines for the CTF log-analysis challenge: TIME USER EVENT IP
+const FAIL_LOG = [
+  "03:01 admin LOGIN_FAILED 198.51.100.7", "03:01 root LOGIN_FAILED 198.51.100.7",
+  "03:02 guest LOGIN_OK 198.51.100.23", "03:02 admin LOGIN_FAILED 198.51.100.7",
+  "03:03 test LOGIN_FAILED 198.51.100.9", "03:03 admin LOGIN_FAILED 198.51.100.7",
+  "03:04 backup LOGIN_FAILED 198.51.100.7", "03:04 mara LOGIN_OK 192.0.2.10",
+  "03:05 root LOGIN_FAILED 198.51.100.7", "03:05 test LOGIN_FAILED 198.51.100.9",
+  "03:06 admin LOGIN_FAILED 198.51.100.7", "03:06 deploy LOGIN_FAILED 198.51.100.9",
+  "03:07 admin LOGIN_OK 198.51.100.7"
+];
+const FAIL_COUNT = FAIL_LOG.filter(l => { const t = l.split(" "); return t[2] === "LOGIN_FAILED" && t[3] === "198.51.100.7"; }).length;
+
+const MEMO = [
+  "Please update all workstations by Friday.",
+  "All staff must reboot after updating.",
+  "Time-sensitive: finish before the audit.",
+  "Contact IT if anything fails.",
+  "Help desk is open from 8 to 5."
+].join("\n");
+
+const FLAG_RULES = "Flags look like FLAG{some_text}. Capital or lowercase letters are both accepted, and extra spaces around the flag are ignored.";
+const flagWrap = (p, v) => (/^flag\{.+\}$/i.test(v.trim()) ? "" : "Flags look like FLAG{...}. Submit the whole flag including the braces. ") + p;
+
+const PUZZLES = [
+  // ---------------- Escape Room ----------------
+  { id: "e1", group: "escape", title: "Checkpoint 1: The Locked Terminal", max: 100, tool: "caesar",
+    text: ["A terminal shows a scrambled message. It was hidden with a Caesar cipher: every letter was moved forward by the same number of places. Decode it, then type the LAST word of the decoded message."],
+    code: caesar("The password is login", 3),
+    check: v => ["login", "the password is login"].includes(n(v)),
+    wrong: v => n(v) === n(caesar("login", 3)) ? "That is still scrambled. Decode the message first with the Caesar tool." : "Not yet. Open the Caesar tool, paste the message, and press Brute Force. Look for the one line that reads like normal English.",
+    hints: ["A Caesar cipher shifts every letter by the same amount. There are only 25 useful shifts.", "In the Caesar tool, press Brute Force and find the line that reads like English.", "The shift is 3. Decode with shift 3 and take the last word."],
+    solution: "login", steps: ["Open the Caesar tool and paste the message.", "Decode with shift 3 (or spot it in Brute Force).", "The message reads: The password is login. The last word is the answer."],
+    explain: "Correct! A Caesar cipher has only 25 keys, so trying them all breaks it in seconds." },
+  { id: "e2", group: "escape", title: "Checkpoint 2: The Vault Panel", max: 100, tool: "b64",
+    text: ["The vault panel displays this string. It uses only letters, digits and sometimes '=' at the end: a typical Base64 pattern. Decode it and type the LAST word."],
+    code: b64enc("the key is firewall"),
+    check: v => ["firewall", "the key is firewall"].includes(n(v)),
+    wrong: v => n(v) === n(b64enc("the key is firewall")) ? "That is the encoded text itself. Decode it first." : "Not yet. Open the Base64 tool, paste the string, and press Decode.",
+    hints: ["Base64 turns data into 64 safe printable characters. It is an encoding, not encryption.", "Use the Base64 tool and press Decode.", "The decoded sentence is 'the key is firewall'."],
+    solution: "firewall", steps: ["Open the Base64 tool.", "Paste the string and press Decode.", "The text reads: the key is firewall. The last word is the answer."],
+    explain: "Correct! Base64 is only an encoding: anyone can reverse it without a key, so never use it to protect secrets." },
+  { id: "e3", group: "escape", title: "Checkpoint 3: The Missing Data", max: 100, tool: "learn",
+    text: ["A confidential file was copied at 22:10 from the Ops laptop. Copying needed physical access to the laptop. Evidence:", "1) Ana was presenting on camera in a live meeting in the main hall from 21:30 to 23:00.", "2) Bo's badge shows he left the building at 18:00 and did not return.", "3) Cy's badge shows he entered the building at 21:55. Nobody else entered after 18:00.", "Who could have copied the file?"],
+    options: [
+      { t: "Ana", ok: false, why: "Ana was visibly presenting in a live meeting during the whole period, so she could not be at the Ops laptop at 22:10." },
+      { t: "Bo", ok: false, why: "Bo's badge shows he left at 18:00 and never re-entered, so he was not in the building." },
+      { t: "Cy", ok: true },
+      { t: "It is impossible to tell", ok: false, why: "The evidence does rule out two people. Eliminate anyone with an alibi and see who is left." }
+    ],
+    hints: ["List who could physically be at the laptop at 22:10.", "Cross out everyone with an alibi.", "Two people have alibis. One does not."],
+    solution: "Cy", steps: ["Ana has an alibi (live meeting).", "Bo has an alibi (left at 18:00).", "Only Cy was present and free at 22:10."],
+    explain: "Correct: Cy had the opportunity. Note that this proves opportunity, not intent. Real investigations look for more evidence." },
+  { id: "e4", group: "escape", title: "Checkpoint 4: The Final Door", max: 100, tool: "learn",
+    text: ["Combine your three discoveries, in order: the password from Checkpoint 1, the keyword from Checkpoint 2, and the name from Checkpoint 3. Separate them with spaces."],
+    check: v => n(v.replace(/[,;]+/g, " ")) === "login firewall cy",
+    wrong: v => { const a = n(v.replace(/[,;]+/g, " ")).split(" "), b = ["login", "firewall", "cy"]; const c = b.filter((w, i) => a[i] === w).length; return c + " of 3 words are correct and in the right place. Check the order: Caesar answer, Base64 answer, then the name."; },
+    hints: ["No new decoding is needed. Reuse your earlier answers.", "Order matters: Checkpoint 1, then 2, then 3.", "The first word is login. Add the other two."],
+    solution: "login firewall cy", steps: ["Checkpoint 1 answer: login.", "Checkpoint 2 answer: firewall.", "Checkpoint 3 answer: Cy. Together: login firewall cy."],
+    explain: "Door unlocked! You combined decoding, encoding awareness and evidence-based reasoning." },
+  // ---------------- Who Is the Hacker? ----------------
+  { id: "i1", group: "invest", title: "Stage 1: Spot the Pattern", max: 100, tool: "log",
+    text: ["Question 1: Which account shows several failed logins followed by a successful login?"],
+    options: [
+      { t: "jlee", ok: true }, { t: "mara", ok: false, why: "mara has only successful events in this log. Look for repeated LOGIN_FAILED lines." },
+      { t: "devon", ok: false, why: "devon has one successful login and nothing else. Look for repeated LOGIN_FAILED lines." },
+      { t: "No account shows this", ok: false, why: "At least one account has a pattern worth examining. Look at the Event column." }],
+    hints: ["Look at the Event column, not just the times.", "Filter the log by each username and count LOGIN_FAILED entries.", "One account has four failures in a row, then a success."],
+    solution: "jlee", steps: ["Filter the log by user.", "jlee has 4 LOGIN_FAILED events (02:11-02:13) then LOGIN_OK at 02:14."],
+    explain: "Correct. Four failures in about two minutes and then a success is a classic password-guessing pattern, though it could also be someone who forgot their password." },
+  { id: "i2", group: "invest", title: "Stage 2: Unfamiliar Source", max: 100, tool: "learn",
+    text: ["Staff logins in this log come from the office range 192.0.2.x. (All addresses here are reserved documentation addresses, so they are fictional.)", "Question 2: Which source address is unfamiliar compared with normal staff activity?"],
+    options: [
+      { t: "203.0.113.50", ok: true }, { t: "192.0.2.10", ok: false, why: "192.0.2.10 is used by mara, a normal office address." },
+      { t: "192.0.2.11", ok: false, why: "192.0.2.11 is used by devon, a normal office address." },
+      { t: "All addresses are equally unfamiliar", ok: false, why: "Two of the three addresses are in the regular office range. Compare them." }],
+    hints: ["Staff addresses share the same first three numbers.", "Compare the address on the failed logins with the addresses used by mara and devon.", "The unfamiliar address begins with 203."],
+    solution: "203.0.113.50", steps: ["mara and devon use 192.0.2.10 and 192.0.2.11.", "All of jlee's suspicious events come from 203.0.113.50, outside that range."],
+    explain: "Correct. A new address is a clue, not proof: VPNs, travel and mobile networks also create new addresses." },
+  { id: "i3", group: "invest", title: "Stage 3: Draw a Careful Conclusion", max: 100, tool: "learn",
+    text: ["After the 02:14 login, jlee's account read payroll_2026.xlsx, was added to the Admins group, and exported customer_db.csv.", "Question 3: What is the most defensible conclusion?"],
+    options: [
+      { t: "A named person is proven to have committed a breach.", ok: false, why: "Logs identify accounts and addresses, not people. Proof of who was at the keyboard needs more evidence." },
+      { t: "This is normal activity; no action is needed.", ok: false, why: "Failures then success from a new address, followed by a privilege change and a data export, should be escalated." },
+      { t: "It is highly suspicious and consistent with a compromised account, but more evidence is needed to confirm it.", ok: true },
+      { t: "mara is responsible because she logged in that morning.", ok: false, why: "Nothing links mara to the 02:xx events. Her activity comes from her usual address at 09:xx." }],
+    hints: ["Ask what the log can prove versus what it can only suggest.", "Logs show accounts and addresses, not people. Innocent explanations exist (VPN, travel).", "Choose the answer that escalates the incident but does not overstate the evidence."],
+    solution: "Highly suspicious and consistent with a compromised account, but needs confirmation", steps: ["List the facts: failures, success, unusual hour, new address, admin role, export.", "Together they are strong indicators, not proof of identity.", "The best conclusion escalates while admitting the limits."],
+    explain: "Correct. Good analysts separate facts from assumptions." },
+  // ---------------- Mini CTF ----------------
+  { id: "c1", group: "ctf", diff: "Beginner", title: "Flag 1: Wrapped in Base64", max: 50, tool: "b64",
+    text: ["A message was found on a fictional server. Decode it to reveal the flag."], code: b64enc("FLAG{base64_is_not_encryption}"),
+    check: v => n(v) === "flag{base64_is_not_encryption}",
+    wrong: v => flagWrap("Decode the string with the Base64 tool. The decoded text is the flag.", v),
+    hints: ["The string looks like Base64.", "Open the Base64 tool and press Decode.", "The flag starts with FLAG{base64..."],
+    solution: "FLAG{base64_is_not_encryption}", steps: ["Paste the string into the Base64 tool.", "Press Decode and copy the result."], explain: "Flag captured!" },
+  { id: "c2", group: "ctf", diff: "Beginner", title: "Flag 2: Shifted Letters", max: 50, tool: "caesar",
+    text: ["This flag was scrambled with a Caesar cipher. The braces and underscore are unchanged."], code: caesar("FLAG{caesar_is_weak}", 7),
+    check: v => n(v) === "flag{caesar_is_weak}",
+    wrong: v => flagWrap("Use the Caesar tool's Brute Force view and find the line that starts with FLAG.", v),
+    hints: ["Every letter moved by the same amount.", "Brute Force shows all 26 shifts at once.", "The shift is 7."],
+    solution: "FLAG{caesar_is_weak}", steps: ["Open the Caesar tool.", "Decode with shift 7."], explain: "Flag captured!" },
+  { id: "c3", group: "ctf", diff: "Intermediate", title: "Flag 3: Hidden in the Memo", max: 75, tool: "learn",
+    text: ["Read this fictional IT memo. A secret word is hidden in its structure, not its meaning. Submit it as FLAG{word}."], code: MEMO,
+    check: v => n(v) === "flag{patch}",
+    wrong: v => flagWrap("Look at how the lines are built, not what they say. Try the first letter of each line.", v),
+    hints: ["The secret is in the structure of the text.", "Read the first letter of every line from top to bottom.", "The letters spell a common IT chore: P-A-T-C-H."],
+    solution: "FLAG{patch}", steps: ["Take the first letter of each line.", "P, A, T, C, H spells PATCH."], explain: "Flag captured! This trick is called an acrostic." },
+  { id: "c4", group: "ctf", diff: "Intermediate", title: "Flag 4: Count the Failures", max: 75, tool: "log",
+    text: ["Open the Text and Log Analyzer, press 'Load CTF log', then count the LOGIN_FAILED events coming from 198.51.100.7. The flag is FLAG{N} where N is that number."], code: FAIL_LOG.join("\n"),
+    check: v => n(v) === "flag{" + FAIL_COUNT + "}",
+    wrong: v => flagWrap("Count only lines that are BOTH LOGIN_FAILED and from 198.51.100.7. Try the keyword 198.51.100.7 in the analyzer and ignore LOGIN_OK lines.", v),
+    hints: ["Only failed logins count, not successful ones.", "Search for 198.51.100.7, then count the lines that say LOGIN_FAILED.", "The count is between 6 and 8."],
+    solution: "FLAG{" + FAIL_COUNT + "}", steps: ["Search the log for 198.51.100.7.", "Ignore the final LOGIN_OK line.", "Count the LOGIN_FAILED lines: " + FAIL_COUNT + "."], explain: "Flag captured!" },
+  { id: "c5", group: "ctf", diff: "Intermediate", title: "Flag 5: Raw Bytes", max: 100, tool: "hex",
+    text: ["These are hexadecimal bytes (each pair of digits is one character). Convert them to text."], code: textToHex("FLAG{hex_is_just_bytes}"),
+    check: v => n(v) === "flag{hex_is_just_bytes}",
+    wrong: v => flagWrap("Use the Hex converter in 'Hex to text' mode.", v),
+    hints: ["Each pair of hex digits is one character code.", "Paste the bytes into the Hex converter and press Hex to text.", "The first bytes 46 4c 41 47 spell FLAG."],
+    solution: "FLAG{hex_is_just_bytes}", steps: ["Open the Hex converter.", "Paste the bytes and press Hex to text."], explain: "Flag captured!" },
+  { id: "c6", group: "ctf", diff: "Final Challenge", title: "Flag 6: Layers", max: 150, tool: "learn",
+    text: ["Two layers of encoding were applied: first ROT13, then Base64. Peel both layers in the right order. Entering the middle-layer text earns partial credit."],
+    code: b64enc(caesar("FLAG{layers_of_encoding}", 13)),
+    check: v => n(v) === "flag{layers_of_encoding}",
+    partial: { match: v => n(v) === "synt{ynlref_bs_rapbqvat}", pts: 40, msg: "You peeled the first layer. Now undo the second one." },
+    wrong: v => n(v) === "synt{ynlref_bs_rapbqvat}" ? "That is the middle layer (already awarded). Apply ROT13 to it." : flagWrap("Undo the layers in reverse order: Base64 first, then ROT13.", v),
+    hints: ["The last layer applied is the first one you remove.", "Decode Base64 first. The result still looks scrambled.", "Apply ROT13 to the Base64 result."],
+    solution: "FLAG{layers_of_encoding}", steps: ["Decode the Base64 string.", "You get SYNT{ynlref_bs_rapbqvat}.", "Apply ROT13 to get the flag."], explain: "Flag captured!" }
+];
+const GROUPS = {
+  escape: { name: "Cyber Escape Room", desc: "Decode, investigate and unlock four connected checkpoints before time runs out." },
+  invest: { name: "Who Is the Hacker?", desc: "Play a junior analyst: study logs, spot patterns and reach a careful conclusion." },
+  ctf: { name: "Mini Capture the Flag", desc: "Find six hidden flags in the format FLAG{...} using the built-in tools." }
+};
+//#PURE-END
+
+// =====================================================================
+// SESSION STATE (saved to localStorage key "cyberArenaSession" if possible)
+// =====================================================================
+const STORE_KEY = "cyberArenaSession";
+const fresh = (old) => ({ solved: {}, hints: {}, attempts: {}, revealed: {}, escStart: 0, over: false,
+  timerOn: old ? old.timerOn : true, limit: old ? old.limit : 180, sessionNo: old ? old.sessionNo : 1 });
+let S = fresh();
+let FB = {};              // latest feedback per puzzle (memory only)
+let view = "home";
+let ticker = null;
+try { const raw = localStorage.getItem(STORE_KEY); if (raw) S = Object.assign(fresh(), JSON.parse(raw)); } catch (e) { /* storage unavailable: run in memory */ }
+function save() { try { localStorage.setItem(STORE_KEY, JSON.stringify(S)); } catch (e) { /* ignore */ } }
+
+const $ = s => document.querySelector(s);
+function h(tag, props, ...kids) {
+  const e = document.createElement(tag);
+  for (const k in props || {}) {
+    const v = props[k];
+    if (k === "class") e.className = v;
+    else if (k.startsWith("on")) e.addEventListener(k.slice(2), v);
+    else if (v !== false && v != null) e.setAttribute(k, v);
+  }
+  kids.flat(Infinity).forEach(c => { if (c != null && c !== false) e.append(c); }); // append() makes text safe
+  return e;
+}
+const P = g => PUZZLES.filter(p => p.group === g);
+const isDone = id => S.solved[id] !== undefined || !!S.revealed[id];
+const groupDone = g => P(g).every(p => isDone(p.id));
+const score = () => Object.values(S.solved).reduce((a, b) => a + b, 0);
+const groupScore = g => P(g).reduce((a, p) => a + (S.solved[p.id] || 0) + (S.solved[p.id + "_p"] || 0), 0);
+const groupMax = g => P(g).reduce((a, p) => a + p.max, 0);
+
+function updateHeader() {
+  $("#hSession").textContent = S.sessionNo;
+  $("#hScore").textContent = score();
+  $("#hDone").textContent = Object.keys(GROUPS).filter(groupDone).length + "/3";
+}
+function resetGroup(g) {
+  P(g).forEach(p => { [p.id, p.id + "_p"].forEach(k => { delete S.solved[k]; }); delete S.hints[p.id]; delete S.attempts[p.id]; delete S.revealed[p.id]; delete FB[p.id]; });
+  if (g === "escape") { S.escStart = 0; S.over = false; }
+  save();
+}
+function newSession() { S = fresh(S); S.sessionNo = S.sessionNo + 1; FB = {}; save(); go("home"); }
+
+// =====================================================================
+// PUZZLE ENGINE
+// =====================================================================
+function submitAnswer(p, v) {
+  if (isDone(p.id)) return;
+  S.attempts[p.id] = (S.attempts[p.id] || 0) + 1;
+  const ok = p.options ? p.options[v].ok : p.check(v);
+  if (ok) {
+    const pts = Math.max(0, ptsFor(p.max, S.hints[p.id] || 0) - (S.solved[p.id + "_p"] || 0));
+    S.solved[p.id] = pts;
+    FB[p.id] = { ok: true, msg: "Correct! +" + pts + " points. " + p.explain };
+  } else if (p.partial && !S.solved[p.id + "_p"] && p.partial.match(v)) {
+    S.solved[p.id + "_p"] = p.partial.pts;
+    FB[p.id] = { ok: true, msg: p.partial.msg + " +" + p.partial.pts + " partial points." };
+  } else {
+    FB[p.id] = { ok: false, suggest: true, msg: p.options ? p.options[v].why : p.wrong(v) };
+  }
+  save();
+}
+function puzzleCard(p, onChange, locked) {
+  const box = h("section", { class: "card", "aria-label": p.title });
+  let val = p.options ? -1 : "";
+  function draw() {
+    const done = isDone(p.id), used = S.hints[p.id] || 0, fb = FB[p.id];
+    const badge = done ? (S.solved[p.id] !== undefined ? "+" + S.solved[p.id] + " pts" : "Revealed (0 pts)") : "Worth " + ptsFor(p.max, used) + " pts now";
+    const parts = [h("div", { class: "ph" }, h("h3", {}, p.title), h("span", { class: "badge" }, (p.diff ? p.diff + " | " : "") + badge)),
+      p.text.map(t => h("p", {}, t)), p.code ? h("pre", {}, p.code) : null];
+    if (done) {
+      if (S.revealed[p.id] && S.solved[p.id] === undefined) parts.push(h("div", { class: "fb" }, "Solution: " + p.solution), h("ol", {}, p.steps.map(s => h("li", {}, s))));
+      else parts.push(h("div", { class: "fb good", role: "status" }, fb && fb.ok ? fb.msg : p.explain));
+    } else {
+      let input;
+      if (p.options) {
+        input = h("div", { class: "row", role: "radiogroup", "aria-label": "Answer choices" }, p.options.map((o, i) =>
+          h("button", { class: val === i ? "sel" : "", role: "radio", "aria-checked": String(val === i), disabled: locked, onclick: () => { val = i; draw(); } }, o.t)));
+      } else {
+        input = h("input", { type: "text", maxlength: 200, "aria-label": "Your answer", placeholder: "Type your answer", disabled: locked, onkeydown: e => { if (e.key === "Enter") go2(); } });
+        input.value = val; input.addEventListener("input", () => { val = input.value; });
+      }
+      const go2 = () => {
+        if (locked) return;
+        if (p.options ? val < 0 : !String(val).trim()) { FB[p.id] = { ok: false, msg: "Please " + (p.options ? "choose an answer" : "type an answer") + " first." }; draw(); return; }
+        submitAnswer(p, val); updateHeader();
+        if (isDone(p.id)) onChange(); else draw();
+      };
+      parts.push(input, h("div", { class: "row" },
+        h("button", { class: "primary", disabled: locked, onclick: go2 }, "Submit"),
+        h("button", { disabled: locked || used >= 3, onclick: () => { S.hints[p.id] = used + 1; save(); draw(); } }, used >= 3 ? "No more hints" : "Show Hint (" + used + "/3)"),
+        p.tool ? h("button", { class: fb && fb.suggest ? "suggest" : "", onclick: () => openToolkit(p.tool) }, "Open " + (p.tool === "learn" ? "Learning Panel" : "helpful tool")) : null,
+        h("button", { class: "danger", disabled: locked, onclick: () => { if (confirm("Reveal the solution? You will earn 0 points for this item.")) { S.revealed[p.id] = true; save(); updateHeader(); onChange(); } } }, "Reveal Solution")));
+      if (fb) parts.push(h("div", { class: "fb", role: "status" }, fb.msg));
+      p.hints.slice(0, used).forEach((t, i) => parts.push(h("div", { class: "hint" }, "Hint " + (i + 1) + ": " + t)));
+    }
+    box.replaceChildren(...parts.flat(Infinity).filter(Boolean));
+  }
+  draw();
+  return box;
+}
+const rulesNote = () => h("p", { class: "mu" }, "Scoring: each hint level used lowers an item's points by 20% (never below 40% of its maximum). Points are awarded once. Revealing a solution gives 0 points. Wrong answers never cost points.");
+
+// =====================================================================
+// VIEWS
+// =====================================================================
+function go(v) { view = v; if (ticker) { clearInterval(ticker); ticker = null; } render(); window.scrollTo(0, 0); }
+function render() {
+  updateHeader();
+  const app = $("#app");
+  app.replaceChildren(view === "home" ? viewHome() : view === "escape" ? viewEscape() : view === "invest" ? viewInvest() : viewCtf());
+}
+function viewHome() {
+  const cards = Object.keys(GROUPS).map(g => h("article", { class: "card chal" }, h("h2", {}, GROUPS[g].name), h("p", {}, GROUPS[g].desc),
+    h("p", { class: "mu" }, P(g).filter(p => isDone(p.id)).length + "/" + P(g).length + " done | " + groupScore(g) + "/" + groupMax(g) + " pts"),
+    h("button", { class: "primary", onclick: () => go(g) }, groupDone(g) ? "Review" : "Start")));
+  return h("div", {},
+    h("p", { class: "boot" }, h("b", {}, "[ OK ]"), " network: disconnected (by design)", h("br"), h("b", {}, "[ OK ]"), " toolkit loaded", h("br"), h("b", {}, "[ OK ]"), " 3 targets ready. Choose one."), h("h2", {}, "Control is an illusion. Skill is not."), h("p", {}, "Test your cybersecurity skills with three fictional challenges. Everything you need is built in."),
+    h("div", { class: "grid" }, cards),
+    h("div", { class: "card" }, h("h3", {}, "How to play"), h("ol", {},
+      h("li", {}, "Pick a challenge card above. You can play them in any order."),
+      h("li", {}, "Wrong answer? Read the feedback. Use Show Hint for step-by-step help."),
+      h("li", {}, "Press the Cyber Toolkit button at any time. Opening it never resets your progress or timer."),
+      h("li", {}, "Use the Home button to come back here. Your total score is shown at the top."),
+      h("li", {}, "Finished? Tell the host so the next player can start.")), rulesNote(),
+      h("p", { class: "mu" }, "Maximum total score: " + Object.keys(GROUPS).reduce((a, g) => a + groupMax(g), 0) + " points.")));
+}
+function summary(g) {
+  return h("div", { class: "win" }, h("h2", {}, g === "escape" ? "You escaped!" : "Challenge complete!"),
+    h("p", {}, "Score for this challenge: " + groupScore(g) + " / " + groupMax(g)), h("p", {}, "Total score: " + score()),
+    h("div", { class: "row", style: "justify-content:center" }, h("button", { class: "primary", onclick: () => go("home") }, "Back to Home"),
+      h("button", { onclick: () => { resetGroup(g); render(); } }, "Restart this challenge")));
+}
+function fmt(sec) { sec = Math.max(0, Math.ceil(sec)); return Math.floor(sec / 60) + ":" + String(sec % 60).padStart(2, "0"); }
+function viewEscape() {
+  const ps = P("escape"), root = h("div", {}, h("h2", {}, "Cyber Escape Room"));
+  if (!S.escStart) {
+    root.append(h("div", { class: "card" }, h("p", {}, "You are locked in a fictional server room. Solve four connected checkpoints to unlock the exit."),
+      h("p", {}, S.timerOn ? "You have " + fmt(S.limit) + " minutes. The timer keeps running while the toolkit is open." : "The timer is switched off by the host."),
+      rulesNote(), h("button", { class: "primary", onclick: () => { S.escStart = Date.now(); S.over = false; save(); render(); } }, "Start Mission")));
+    return root;
+  }
+  const all = groupDone("escape");
+  const doneCount = ps.filter(p => isDone(p.id)).length;
+  const timerEl = h("div", { class: "timer", id: "timer", role: "timer" }, "");
+  root.append(h("div", { class: "card" }, timerEl, h("p", {}, "Checkpoint " + Math.min(doneCount + 1, ps.length) + " of " + ps.length), h("progress", { max: ps.length, value: doneCount, "aria-label": "Progress" })));
+  const tick = () => {
+    if (!S.timerOn) { timerEl.textContent = "Timer off"; return; }
+    const left = S.limit - (Date.now() - S.escStart) / 1000;
+    timerEl.textContent = fmt(left); timerEl.className = "timer" + (left < 30 ? " low" : "");
+    if (left <= 0 && !groupDone("escape") && !S.over) { S.over = true; save(); clearInterval(ticker); ticker = null; render(); }
+  };
+  tick();
+  if (!all && !S.over && ticker === null) ticker = setInterval(tick, 500);
+  let shown = false;
+  ps.forEach(p => { if (shown) return; root.append(puzzleCard(p, render, S.over)); if (!isDone(p.id)) shown = true; });
+  if (S.over && !all) root.append(h("div", { class: "fb" }, "Time is up! Your points so far are kept."), h("button", { class: "primary", onclick: () => { resetGroup("escape"); render(); } }, "Restart Escape Room"));
+  if (all) root.append(summary("escape"));
+  return root;
+}
+function viewInvest() {
+  const ps = P("invest"), root = h("div", {}, h("h2", {}, "Who Is the Hacker?"));
+  let pick = -1, filter = "";
+  const tbody = h("tbody"), helpBox = h("p", { class: "mu", role: "status" }, "Click a row to learn what the event type means.");
+  const users = Array.from(new Set(LOG.map(r => r[1])));
+  const sel = h("select", { "aria-label": "Filter by user", onchange: () => { filter = sel.value; drawRows(); } }, h("option", { value: "" }, "All users"), users.map(u => h("option", { value: u }, u)));
+  function drawRows() {
+    tbody.replaceChildren(...LOG.map((r, i) => ({ r, i })).filter(o => !filter || o.r[1] === filter).map(o =>
+      h("tr", { class: pick === o.i ? "pick" : "", tabindex: 0, onclick: () => { pick = o.i; helpBox.textContent = o.r[2] + ": " + EVENT_HELP[o.r[2]]; drawRows(); },
+        onkeydown: e => { if (e.key === "Enter") e.currentTarget.click(); } }, o.r.map(c => h("td", {}, c)))));
+  }
+  drawRows();
+  root.append(h("div", { class: "card" }, h("p", {}, "Northwind Labs (a fictional company) asked you, the junior security analyst, to review last night's activity. Work through three stages. Remember: logs show what accounts did, not who was at the keyboard."),
+    h("div", { class: "row" }, h("label", {}, "Filter: "), sel, h("button", { onclick: () => openToolkit("log") }, "Open Log Analyzer")),
+    h("div", { style: "overflow:auto" }, h("table", {}, h("caption", { class: "mu" }, "Activity timeline (chronological)"), h("thead", {}, h("tr", {}, ["Time", "User", "Event", "Source IP", "Detail"].map(c => h("th", {}, c)))), tbody)), helpBox), rulesNote());
+  let shown = false;
+  ps.forEach(p => { if (shown) return; root.append(puzzleCard(p, render, false)); if (!isDone(p.id)) shown = true; });
+  if (groupDone("invest")) root.append(h("div", { class: "card" }, h("h2", {}, "Incident Report: Northwind Labs"),
+    h("h3", {}, "Suspicious events"), h("ul", {}, h("li", {}, "02:11-02:13: four failed logins for jlee from 203.0.113.50."), h("li", {}, "02:14: successful login for jlee from the same unfamiliar address."), h("li", {}, "02:16-02:21: payroll file read, Admins role added, customer data exported.")),
+    h("h3", {}, "Evidence supporting the conclusion"), h("p", {}, "Repeated failures then a success, an unusual hour, an address outside the office range, then privilege change and data export in minutes."),
+    h("h3", {}, "Limits of the evidence"), h("p", {}, "The log identifies an account and an address, not a person. The owner could have been travelling, on a VPN, or doing authorised work. The log does not show why the role changed."),
+    h("h3", {}, "Next steps a real analyst might take"), h("ul", {}, h("li", {}, "Contact jlee through a trusted channel to confirm the activity."), h("li", {}, "Temporarily disable the account and reset credentials."), h("li", {}, "Review the Admins change and what was exported."), h("li", {}, "Check other systems for logins from 203.0.113.50."), h("li", {}, "Preserve the logs and document every step.")),
+    summary("invest")));
+  return root;
+}
+function viewCtf() {
+  const root = h("div", {}, h("h2", {}, "Mini Capture the Flag"));
+  root.append(h("div", { class: "card" }, h("p", {}, "Solve each challenge to find a flag. " + FLAG_RULES), h("p", {}, "Every flag can be solved with the Cyber Toolkit. Challenges can be done in any order."), rulesNote()));
+  P("ctf").forEach(p => root.append(puzzleCard(p, render, false)));
+  if (groupDone("ctf")) root.append(summary("ctf"));
+  return root;
+}
+
+// =====================================================================
+// OVERLAYS (toolkit and host panel)
+// =====================================================================
+function closeOverlay() { const o = $("#overlay"); o.replaceChildren(); o.hidden = true; }
+function openOverlay(title, body) {
+  const o = $("#overlay"); o.replaceChildren(h("div", { class: "modal", role: "dialog", "aria-modal": "true", "aria-label": title },
+    h("div", { class: "mh" }, h("h2", {}, title), h("button", { onclick: closeOverlay, "aria-label": "Close panel" }, "Close")), body)); o.hidden = false;
+  o.querySelector("button").focus();
+}
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeOverlay(); });
+
+function copyText(t, btn) {
+  const done = () => { btn.textContent = "Copied!"; setTimeout(() => { btn.textContent = "Copy"; }, 1200); };
+  const fallback = () => { const ta = h("textarea"); ta.value = t; document.body.append(ta); ta.select(); try { document.execCommand("copy"); done(); } catch (e) { btn.textContent = "Copy failed"; } ta.remove(); };
+  if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(t).then(done, fallback); else fallback();
+}
+const ta = (label, rows) => h("textarea", { rows: rows || 4, maxlength: 5000, "aria-label": label });
+function hl(line, kw) {
+  const f = document.createDocumentFragment(), l = line.toLowerCase(), k = kw.toLowerCase(); let i = 0;
+  for (;;) { const j = l.indexOf(k, i); if (j < 0) { f.append(line.slice(i)); break; } f.append(line.slice(i, j), h("mark", {}, line.slice(j, j + k.length))); i = j + k.length; }
+  return f;
+}
+function simpleTool(fns) {
+  const inp = ta("Input text"), out = h("pre", { class: "out", "aria-live": "polite" }); let bad = false;
+  const set = (t, e) => { out.className = "out" + (e ? " err" : ""); out.textContent = t; bad = !!e; };
+  const copy = h("button", { onclick: () => copyText(out.textContent, copy) }, "Copy");
+  return h("div", {}, inp, h("div", { class: "row" },
+    fns.map(([l, f]) => h("button", { class: "primary", onclick: () => { if (!inp.value) { set("Enter some text first.", true); return; } try { set(f(inp.value)); } catch (e) { set(e.message || "Invalid input.", true); } } }, l)),
+    h("button", { onclick: () => { if (out.textContent && !bad) inp.value = out.textContent; } }, "Swap output to input"), copy,
+    h("button", { onclick: () => { inp.value = ""; set(""); } }, "Clear")), out);
+}
+const TOOLS = [
+  { id: "b64", name: "Base64", learn: ["Base64 turns bytes into 64 printable characters so data can travel as plain text. It is an ENCODING, not encryption: anyone can reverse it without a key.", "Example: Hi becomes SGk="], build: () => simpleTool([["Encode", b64enc], ["Decode", b64dec]]) },
+  { id: "caesar", name: "Caesar", learn: ["A Caesar cipher moves every letter forward by a fixed shift (0 to 25). To decode, move letters back. With only 25 useful keys it is easy to break by trying them all (brute force).", "Example: shift 3 turns CAT into FDW."],
+    build: () => {
+      const inp = ta("Text"), sh = h("input", { type: "number", min: 0, max: 25, value: 3, "aria-label": "Shift from 0 to 25" }), out = h("pre", { class: "out", "aria-live": "polite" });
+      const set = (t, e) => { out.className = "out" + (e ? " err" : ""); out.textContent = t; };
+      const run = d => () => { const k = parseInt(sh.value, 10); if (isNaN(k) || k < 0 || k > 25) { set("Shift must be a whole number from 0 to 25.", true); return; } set(caesar(inp.value, d * k)); };
+      const copy = h("button", { onclick: () => copyText(out.textContent, copy) }, "Copy");
+      return h("div", {}, inp, h("div", { class: "row" }, h("label", {}, "Shift: "), sh, h("button", { class: "primary", onclick: run(1) }, "Encode"), h("button", { class: "primary", onclick: run(-1) }, "Decode"),
+        h("button", { onclick: () => set(Array.from({ length: 26 }, (_, k) => "Shift " + String(k).padStart(2, "0") + ": " + caesar(inp.value.slice(0, 200), -k)).join("\n")) }, "Brute Force (all 26)"), copy,
+        h("button", { onclick: () => { inp.value = ""; set(""); } }, "Clear")), out);
+    } },
+  { id: "rot13", name: "ROT13", learn: ["ROT13 is a Caesar cipher with a shift of exactly 13. Because the alphabet has 26 letters, applying it twice returns the original text, so one button both encodes and decodes.", "Example: HELLO becomes URYYB."], build: () => simpleTool([["Apply ROT13", s => caesar(s, 13)]]) },
+  { id: "hash", name: "SHA-256", learn: ["A hash turns any input into a fixed-length fingerprint. The same input always gives the same hash, a tiny change gives a completely different hash, and you cannot reverse it. Hashing is NOT encryption because there is nothing to decrypt.", "Example: hashing 'a' and 'A' gives two unrelated results."],
+    build: () => {
+      const inp = ta("Text to hash", 3), out = h("pre", { class: "out", "aria-live": "polite" }), copy = h("button", { onclick: () => copyText(out.textContent, copy) }, "Copy");
+      const run = async () => {
+        out.className = "out";
+        if (!(window.crypto && window.crypto.subtle)) {
+          let c = 0; for (const ch of inp.value) c = (c * 31 + ch.charCodeAt(0)) % 1000000007;
+          out.textContent = "SHA-256 is unavailable in this browser context, so NO SHA-256 hash was computed.\nEducational toy checksum only (NOT secure, NOT SHA-256): " + c; return;
+        }
+        const d = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(inp.value));
+        out.textContent = "SHA-256: " + Array.from(new Uint8Array(d)).map(b => b.toString(16).padStart(2, "0")).join("");
+      };
+      return h("div", {}, inp, h("div", { class: "row" }, h("button", { class: "primary", onclick: run }, "Compute SHA-256"), copy, h("button", { onclick: () => { inp.value = ""; out.textContent = ""; } }, "Clear")), out);
+    } },
+  { id: "log", name: "Log Analyzer", learn: ["Analysts search logs for patterns. This tool counts lines, highlights keywords and applies a simple rule: an account and address with at least N LOGIN_FAILED events is flagged. It expects lines like: TIME USER EVENT IP. Everything stays in your browser.", "Example: 4 LOGIN_FAILED lines for one account suggests repeated guessing."],
+    build: () => {
+      const inp = ta("Log text", 8), kw = h("input", { type: "text", maxlength: 100, "aria-label": "Keyword", placeholder: "Keyword, e.g. admin" }),
+        th = h("input", { type: "number", min: 1, max: 50, value: 3, "aria-label": "Failure threshold" }), out = h("div", { class: "out", "aria-live": "polite" });
+      const run = () => {
+        out.replaceChildren(); const text = inp.value;
+        if (!text.trim()) { out.append("Paste some fictional log text first, or load a sample."); return; }
+        const lines = text.split(/\r?\n/), k = kw.value.trim(), T = Math.max(1, parseInt(th.value, 10) || 3);
+        out.append(h("p", {}, "Lines: " + lines.length + " | Words: " + text.trim().split(/\s+/).length + " | Characters: " + text.length));
+        if (k) { const m = lines.filter(l => l.toLowerCase().includes(k.toLowerCase())); out.append(h("p", {}, m.length + " line(s) contain \"" + k + "\":"), ...m.slice(0, 100).map(l => h("div", {}, hl(l, k)))); }
+        const cnt = {}; lines.forEach(l => { const t = l.trim().split(/\s+/); if (t[2] === "LOGIN_FAILED") { const key = t[1] + " from " + (t[3] || "unknown"); cnt[key] = (cnt[key] || 0) + 1; } });
+        const hits = Object.entries(cnt).filter(e => e[1] >= T);
+        out.append(h("p", {}, "Failed-login rule (" + T + " or more per account and address):"), hits.length ? h("ul", {}, hits.map(e => h("li", {}, e[0] + ": " + e[1] + " failures"))) : h("p", {}, "No account and address reached the threshold."));
+      };
+      return h("div", {}, h("div", { class: "row" }, h("button", { onclick: () => { inp.value = LOG.map(r => r.join(" ").replace(/\s+$/, "")).join("\n"); } }, "Load sample log"), h("button", { onclick: () => { inp.value = FAIL_LOG.join("\n"); } }, "Load CTF log")),
+        inp, h("div", { class: "row" }, kw, h("label", {}, "Threshold: "), th, h("button", { class: "primary", onclick: run }, "Analyze"), h("button", { onclick: () => { inp.value = ""; out.replaceChildren(); } }, "Clear")), out);
+    } },
+  { id: "hex", name: "Hex / ASCII", learn: ["Computers store text as numbers. Hexadecimal writes each byte as two digits (0-9, A-F). For example, 48 69 is the text Hi.", "Example: 46 4c 41 47 spells FLAG."], build: () => simpleTool([["Hex to text", hexToText], ["Text to hex", textToHex]]) },
+  { id: "pass", name: "Password Strength", learn: ["Longer passwords are stronger than short complex ones. Mixing letter types helps, but common passwords are guessed first. A passphrase of several random words is long and easy to remember.", "Example: 'correct horse battery staple' beats 'P@ssw0rd!'."],
+    build: () => {
+      const inp = h("input", { type: "text", autocomplete: "off", maxlength: 100, "aria-label": "Fictional sample password" }), out = h("div", { class: "out", "aria-live": "polite" });
+      inp.addEventListener("input", () => {
+        const pw = inp.value; out.replaceChildren(); if (!pw) return;
+        const classes = [/[a-z]/, /[A-Z]/, /\d/, /[^A-Za-z0-9]/].filter(r => r.test(pw)).length;
+        const pool = (/[a-z]/.test(pw) ? 26 : 0) + (/[A-Z]/.test(pw) ? 26 : 0) + (/\d/.test(pw) ? 10 : 0) + (/[^A-Za-z0-9]/.test(pw) ? 32 : 0);
+        const bits = Math.round(pw.length * Math.log2(pool || 1)), common = ["password", "123456", "qwerty", "letmein", "admin", "welcome", "iloveyou", "abc123"].some(w => pw.toLowerCase().includes(w));
+        const rating = common ? "Very weak (contains a common password)" : bits < 28 ? "Very weak" : bits < 40 ? "Weak" : bits < 60 ? "Fair" : bits < 80 ? "Strong" : "Very strong";
+        out.append(h("p", {}, "Rating: " + rating), h("ul", {}, h("li", {}, "Length: " + pw.length + (pw.length < 12 ? " (aim for 12 or more)" : " (good)")), h("li", {}, "Character types used: " + classes + " of 4"),
+          h("li", {}, "Rough size estimate: " + bits + " bits (assumes random characters; patterns make real strength lower)"), /(.)\1\1/.test(pw) ? h("li", {}, "Repeated characters make guessing easier.") : null,
+          h("li", {}, "Tip: a passphrase of 4 or more random words is long and memorable.")));
+      });
+      return h("div", {}, h("p", { class: "fb" }, "Warning: type only FICTIONAL sample passwords. Nothing you type is stored or sent anywhere."), inp, out);
+    } },
+  { id: "url", name: "URL Inspector", learn: ["A URL has parts: protocol (https), hostname (example.com), path (/page) and query parameters (?a=1). Attackers hide tricks in these parts, so inspect before trusting. This tool only splits the text and makes NO network request.", "Example: https://example.com/login?next=home"],
+    build: () => {
+      const inp = h("input", { type: "text", maxlength: 500, "aria-label": "URL to inspect", placeholder: "https://example.com/path?x=1" }), out = h("div", { class: "out", "aria-live": "polite" });
+      const run = () => {
+        out.replaceChildren(); let u; try { u = new URL(inp.value.trim()); } catch (e) { out.className = "out err"; out.textContent = "This is not a complete URL. Include a protocol such as https://"; return; }
+        out.className = "out"; const notes = [];
+        if (u.protocol !== "https:") notes.push("Not HTTPS: traffic is not encrypted."); if (u.username || u.password) notes.push("Contains a user/password part before @, a common trick to disguise the real host.");
+        if (/^xn--|\.xn--/.test(u.hostname)) notes.push("Punycode hostname: it may imitate other characters."); if (/^\d+\.\d+\.\d+\.\d+$/.test(u.hostname)) notes.push("Host is a raw IP address.");
+        const rows = [["Protocol", u.protocol], ["Hostname", u.hostname], ["Port", u.port || "(default)"], ["Path", u.pathname], ["Fragment", u.hash || "(none)"]];
+        u.searchParams.forEach((v, k) => rows.push(["Parameter " + k, v]));
+        out.append(h("table", {}, h("tbody", {}, rows.map(r => h("tr", {}, h("th", {}, r[0]), h("td", {}, r[1]))))), h("ul", {}, (notes.length ? notes : ["No obvious warning signs, but always stay cautious."]).map(t => h("li", {}, t))));
+      };
+      return h("div", {}, inp, h("div", { class: "row" }, h("button", { class: "primary", onclick: run }, "Inspect"), h("button", { onclick: () => { inp.value = ""; out.replaceChildren(); } }, "Clear")), out);
+    } },
+  { id: "learn", name: "Learning Panel", learn: ["Pick a concept below for a plain-English explanation, a worked example, and a button that opens the matching tool."],
+    build: () => h("div", {}, TOOLS.filter(t => t.id !== "learn").map(t => h("div", { class: "card" }, h("h3", {}, t.name), t.learn.map(x => h("p", {}, x)), h("button", { class: "primary", onclick: () => openToolkit(t.id) }, "Open " + t.name + " tool")))) }
+];
+function openToolkit(id) {
+  const body = h("div"), tabs = h("div", { class: "tabs", role: "tablist" });
+  function show(tid) {
+    const t = TOOLS.find(x => x.id === tid);
+    tabs.replaceChildren(...TOOLS.map(x => h("button", { role: "tab", class: x.id === tid ? "sel" : "", "aria-selected": String(x.id === tid), onclick: () => show(x.id) }, x.name)));
+    body.replaceChildren(h("details", { open: "" }, h("summary", {}, "What is this? (beginner explanation)"), t.learn.map(x => h("p", {}, x))), t.build());
+  }
+  openOverlay("CYBER TOOLKIT", h("div", {}, h("p", { class: "mu" }, "All tools run locally. Your challenge progress and timer are not affected."), tabs, body));
+  show(TOOLS.some(x => x.id === id) ? id : "b64");
+}
+
+// ---------- Host panel ----------
+function exportCsv() {
+  const q = v => '"' + String(v).replace(/"/g, '""') + '"', rows = [["Session", "Challenge", "Item", "Status", "Points", "Hints used", "Attempts"]];
+  PUZZLES.forEach(p => rows.push([S.sessionNo, GROUPS[p.group].name, p.title, S.solved[p.id] !== undefined ? "Solved" : S.revealed[p.id] ? "Revealed" : "Not completed", (S.solved[p.id] || 0) + (S.solved[p.id + "_p"] || 0), S.hints[p.id] || 0, S.attempts[p.id] || 0]));
+  rows.push([S.sessionNo, "TOTAL", "", "", score(), "", ""]);
+  const blob = new Blob([rows.map(r => r.map(q).join(",")).join("\r\n")], { type: "text/csv" });
+  const a = h("a", { href: URL.createObjectURL(blob), download: "arena-session-" + S.sessionNo + ".csv" }); document.body.append(a); a.click(); a.remove();
+}
+function openHost() {
+  const body = h("div", {}, h("p", { class: "mu" }, "Convenience controls for the event host. This panel is not a security feature."),
+    h("p", {}, "Player " + S.sessionNo + " | Score " + score()),
+    h("ul", {}, Object.keys(GROUPS).map(g => h("li", {}, GROUPS[g].name + ": " + (groupDone(g) ? "completed" : "in progress or not started") + " (" + groupScore(g) + "/" + groupMax(g) + " pts) ",
+      h("button", { onclick: () => { if (confirm("Reset " + GROUPS[g].name + "? Its points will be removed.")) { resetGroup(g); render(); closeOverlay(); } } }, "Reset this challenge")))),
+    h("div", { class: "row" }, h("label", {}, h("input", { type: "checkbox", checked: S.timerOn ? "" : null, onchange: e => { S.timerOn = e.target.checked; save(); } }), " Escape Room timer enabled"),
+      h("label", {}, "Time limit: ", h("select", { onchange: e => { S.limit = parseInt(e.target.value, 10); save(); } }, [[180, "3 minutes"], [300, "5 minutes"], [600, "10 minutes"]].map(o => h("option", { value: o[0], selected: S.limit === o[0] ? "" : null }, o[1]))))),
+    h("div", { class: "row" }, h("button", { class: "primary", onclick: () => { if (confirm("Start a NEW player session? The current score and progress will be cleared.")) { newSession(); closeOverlay(); } } }, "Next Player / New Session"),
+      h("button", { class: "danger", onclick: () => { if (confirm("Reset the current session? All score and progress will be cleared.")) { const no = S.sessionNo; S = fresh(S); S.sessionNo = no; FB = {}; save(); closeOverlay(); go("home"); } } }, "Reset current session"),
+      h("button", { onclick: exportCsv }, "Export results (CSV)"), h("button", { onclick: () => { closeOverlay(); go("home"); } }, "Return Home")),
+    h("details", {}, h("summary", {}, "What is saved on this computer?"), h("p", {}, "Only one browser localStorage item named cyberArenaSession: score, solved items, hint and attempt counts, timer start, and host settings. No names or personal data. Starting a new session or resetting clears it.")));
+  openOverlay("Host Panel", body);
+}
+
+$("#bHome").addEventListener("click", () => { closeOverlay(); go("home"); });
+$("#bTools").addEventListener("click", () => openToolkit("b64"));
+$("#bHost").addEventListener("click", openHost);
+render();
+</script>
+</body>
+</html>
